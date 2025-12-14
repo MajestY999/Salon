@@ -240,12 +240,4 @@
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   z-index: 1000;
-  max-width: 520px;             /* ограничиваем ширину */
-  width: calc(100% - 32px);     /* не во весь экран */
-  font-size: 14px;
-  line-height: 1.35;
-  white-space: normal;          /* перенос строк разрешён */
-  overflow-wrap: anywhere;      /* переносить длинные слова */
-  word-break: break-word;       /* подстраховка */
-  text-align: left;
 }
