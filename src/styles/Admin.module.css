@@ -104,21 +104,148 @@
 /* helpers */
 .noteSmall { color:#5f7791; margin:6px 0; font-size:13px; }
 
-/* responsive */
+/* responsive base */
 @media (max-width: 720px) {
   .rowTop { grid-template-columns: 1fr; }
   .header { grid-template-columns: 1fr; }
 }
 
+/* Mobile touch targets and scrollable tabs */
+.btn, .btnDanger, .tabBtn, .dayBtn, .input, .search { min-height: 44px; }
+
+.tabRow {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tabRow::-webkit-scrollbar { display: none; }
+.tabBtn { flex: 0 0 auto; }
+
+/* Mobile fine-tuning */
+@media (max-width: 600px) {
+  .container { padding: 12px; }
+
+  .header {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .title {
+    font-size: 20px;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .headerActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .search {
+    grid-column: 1 / -1;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .btn, .btnDanger {
+    min-height: 40px;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .content { margin: 0; }
+
+  .list { gap: 10px; }
+  .card { padding: 10px; }
+
+  .rowTop {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .kv { gap: 6px; }
+  .tag, .statusTag { font-size: 12px; padding: 4px 6px; }
+
+  .mainInfo { gap: 4px; }
+  .line { justify-content: space-between; }
+  .label { font-size: 12px; }
+  .value { font-size: 14px; text-align: right; }
+
+  .priceBox { justify-content: flex-start; }
+  .price { font-size: 16px; padding: 6px 8px; }
+  .priceSmall { font-size: 12px; }
+
+  .note { min-height: 64px; font-size: 14px; }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    justify-content: initial;
+  }
+  .actions .btnDanger { grid-column: 1 / -1; }
+
+  .panel { padding: 10px; }
+  .panelHeader { flex-direction: column; align-items: stretch; gap: 8px; }
+  .serviceForm {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 12px;
+  }
+  .servicesList .serviceRow { padding: 10px; gap: 8px; }
+  .serviceActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .schedulesList { gap: 10px; }
+  .scheduleCard { padding: 10px; }
+  .daysRow { gap: 6px; }
+  .dayBtn { font-size: 12px; padding: 6px 8px; }
+
+  /* Toast — bottom center on mobile */
+  .toast {
+    top: auto;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 420px;
+    width: calc(100% - 24px);
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+}
+
+/* Very small devices */
+@media (max-width: 360px) {
+  .btn, .btnDanger, .tabBtn { font-size: 13px; min-height: 38px; padding: 6px 10px; }
+  .input, .search { min-height: 38px; font-size: 14px; }
+}
+
+/* Toast default (desktop) */
 .toast {
   position: fixed;
-  top: 16px;              /* сверху */
-  left: 50%;              /* центр по горизонтали */
+  top: 16px;
+  left: 50%;
   transform: translateX(-50%);
   background: #111827;
   color: #fff;
-  padding: 10px 14px;
+  padding: 8px 12px;            /* компактнее */
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   z-index: 1000;
+  max-width: 520px;             /* ограничиваем ширину */
+  width: calc(100% - 32px);     /* не во весь экран */
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: normal;          /* перенос строк разрешён */
+  overflow-wrap: anywhere;      /* переносить длинные слова */
+  word-break: break-word;       /* подстраховка */
+  text-align: left;
 }
