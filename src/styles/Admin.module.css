@@ -79,7 +79,7 @@
 }
 .btn { background: linear-gradient(180deg,#f2f6ff,#e9f1ff); color:#245a8f; }
 .btn:hover { background: linear-gradient(180deg,#eaf1ff,#e3ecff); border-color:#bfd0ee; }
-.btnDanger { background: linear-gradient(180deg,#ffecec,#ffdеде); border-color:#e6b4b4; color:#9b2d2d; }
+.btnDanger { background: linear-gradient(180deg,#ffecec,#ffdede); border-color:#e6b4b4; color:#9b2d2d; }
 
 /* login */
 .loginBox { max-width:520px; width:100%; margin:40px auto 0; border:1px solid #cfd9ee; border-radius:12px; padding:16px; background: linear-gradient(180deg,#f4f8ff,#eef4ff); box-shadow:0 6px 20px rgba(22,36,64,0.08); }
