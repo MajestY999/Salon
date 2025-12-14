@@ -3,7 +3,7 @@ import AnnaImg from '../assets/anna.jpg';
 import IrinaImg from '../assets/Irina.jpg';
 import ElenaImg from '../assets/Elena.jpg';
 
-
+// ...existing code...
 const team = [
   { id: 1, name: 'Анна',  role: 'Мастер', specialty: 'Окрашивание и стрижка', img: AnnaImg },
   { id: 2, name: 'Ирина', role: 'Мастер', specialty: 'Визаж',                  img: IrinaImg },
@@ -20,9 +20,13 @@ const Team = () => (
             <img
               src={p.img}
               alt={p.name}
+              width={800}
+              height={600}
               className="w-full h-64 object-cover"
               loading="lazy"
               decoding="async"
+              srcSet={`${p.img} 800w`}
+              sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
             />
             <div className="p-5">
               <h3 className="font-bold text-xl">{p.name}</h3>
