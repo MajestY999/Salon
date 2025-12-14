@@ -100,6 +100,7 @@ export default function useBooking() {
     setBaseSlots(nextSlots);
   }, [formData.masterId, formData.serviceId, schedules]);
 
+  
   const slots = baseSlots;
 
   const handleChange = (e) => {

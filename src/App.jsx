@@ -30,6 +30,7 @@ function App() {
       {/* Admin не показываем на клиентских маршрутах */}
     </div>
   );
-}
+}  
+
 
 export default App;
