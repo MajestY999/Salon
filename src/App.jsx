@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from 'react';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Team from './components/Team';
@@ -8,29 +8,41 @@ import Admin from './components/Admin';
 import Footer from './components/Footer';
 import Header from './components/Header';
 
-
 function App() {
-  const isAdminRoute = typeof window !== 'undefined' && window.location.pathname === '/admin';
+  
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    const onChange = () => forceUpdate(n => n + 1);
+    window.addEventListener('hashchange', onChange);
+    window.addEventListener('popstate', onChange);
+    return () => {
+      window.removeEventListener('hashchange', onChange);
+      window.removeEventListener('popstate', onChange);
+    };
+  }, []);
+
+const isAdminRoute = (() => {
+  const { pathname, hash } = window.location;
+  const byPath = pathname.endsWith('/admin') || pathname.endsWith('/admin/');
+  const byHash = hash === '#admin' || hash === '#/admin';
+  return byPath || byHash;
+})();
 
   if (isAdminRoute) {
-    // отдельный рендер админ-панели по /admin
     return <Admin />;
   }
 
-  // обычный сайт для клиентов
   return (
     <div className="bg-violet-50">
       <Hero />
       <Services />
       <Team />
-      <Header/>
+      <Header />
       <BookingForm />
       <Contacts />
       <Footer />
-      {/* Admin не показываем на клиентских маршрутах */}
     </div>
   );
-}  
-
+}
 
 export default App;
