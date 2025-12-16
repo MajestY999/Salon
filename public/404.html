@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="ru">
   <head>
     <meta charset="utf-8" />
     <title>Redirecting…</title>
@@ -9,12 +9,11 @@
     <script>
       (function () {
         var l = window.location;
-        // базовый путь репозитория для project pages(если вдруг не работает Admin.jsx)
         var parts = l.pathname.split('/').filter(Boolean);
-        var base = parts.length ? '/' + parts[0] : '';
-        var rest = l.pathname.slice(base.length);
-        // редиректим в hash-маршрут, сохраняя query/hash
-        l.replace(base + '/#' + rest + l.search + l.hash);
+        var isProject = l.hostname.endsWith('github.io') && parts.length > 0;
+        var base = isProject ? '/' + parts[0] + '/' : '/';
+        // Всегда уводим на главный блок Hero
+        l.replace(base + '#home');
       })();
     </script>
     Redirecting…
