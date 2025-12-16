@@ -79,13 +79,7 @@ const Footer = () => {
       {/* Нижняя панель */}
       <div className="container mx-auto px-4 mt-6 flex flex-col md:flex-row items-center justify-between gap-3">
         <p className="text-xs text-gray-500">Работаем: <br />Пн–Пт 10:00–21:00<br />  Сб-Вс 10:00–18:00</p>
-        <a
-          href="/admin"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded bg-primary text-white hover:bg-red-700 transition"
-          title="Перейти в админ-панель"
-        >
-          Админ панель
-        </a>
+        
       </div>
     </footer>
   );
