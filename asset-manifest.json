@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/Salon/static/css/main.c7655785.css",
-    "main.js": "/Salon/static/js/main.7678a7f0.js",
+    "main.css": "/Salon/static/css/main.80be601d.css",
+    "main.js": "/Salon/static/js/main.6bec9224.js",
     "static/media/Irina.jpg": "/Salon/static/media/Irina.6f4ed617fcaa90f7f98a.jpg",
     "static/media/Elena.jpg": "/Salon/static/media/Elena.87c1cbec3c9be7a02e2a.jpg",
     "static/media/anna.jpg": "/Salon/static/media/anna.3812f4fb8591648c4c77.jpg",
     "index.html": "/Salon/index.html",
-    "main.c7655785.css.map": "/Salon/static/css/main.c7655785.css.map",
-    "main.7678a7f0.js.map": "/Salon/static/js/main.7678a7f0.js.map"
+    "main.80be601d.css.map": "/Salon/static/css/main.80be601d.css.map",
+    "main.6bec9224.js.map": "/Salon/static/js/main.6bec9224.js.map"
   },
   "entrypoints": [
-    "static/css/main.c7655785.css",
-    "static/js/main.7678a7f0.js"
+    "static/css/main.80be601d.css",
+    "static/js/main.6bec9224.js"
   ]
 }
