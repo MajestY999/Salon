@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <script>
+      (function () {
+        var l = window.location;
+        // базовый путь репозитория для project pages(если вдруг не работает Admin.jsx)
+        var parts = l.pathname.split('/').filter(Boolean);
+        var base = parts.length ? '/' + parts[0] : '';
+        var rest = l.pathname.slice(base.length);
+        // редиректим в hash-маршрут, сохраняя query/hash
+        l.replace(base + '/#' + rest + l.search + l.hash);
+      })();
+    </script>
+    Redirecting…
+  </body>
+</html>
