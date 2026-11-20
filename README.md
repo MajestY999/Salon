@@ -1,70 +1,106 @@
-# Getting Started with Create React App
+# Салон красоты «Стиль & Красота»
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Веб-приложение салона: публичная страница с услугами и онлайн-записью, а также административная панель для просмотра заявок и управления каталогом. Проект предназначен для демонстрации и учебной работы.
 
-## Available Scripts
+## Возможности
 
-In the project directory, you can run:
+- Адаптивный лендинг: услуги, команда, запись и контакты.
+- Форма записи с выбором мастера, услуги, даты и свободного времени.
+- Админ-панель по адресу `/admin`: список записей, статусы, фильтрация, услуги и расписания.
+- Локальный API сохраняет услуги и записи в SQLite.
+- Начальные услуги, мастера и демонстрационные записи добавляются автоматически, если соответствующие таблицы пусты.
 
-### `npm start`
+## Технологии
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Клиент:** React 19, React Router DOM 7, Tailwind CSS, Create React App.
+- **Сервер:** Node.js, Express, Sequelize, SQLite (`sqlite3`).
+- **Обмен данными:** JSON API; в разработке запросы `/api` проксируются на `http://localhost:5001`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Запуск локально
 
-### `npm test`
+Нужны Node.js и npm. Команды выполняйте из корня репозитория — папки, где находится этот README и корневой `package.json`.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Установить зависимости
 
-### `npm run build`
+```sh
+npm install
+npm install --prefix server
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. Настроить сервер при первом запуске
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Создайте локальный файл окружения:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```sh
+cp server/.env.example server/.env
+```
 
-### `npm run eject`
+`server/.env` не хранится в Git. Основные настройки:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+| Переменная       | Значение по умолчанию | Назначение                                 |
+| ---------------- | --------------------- | ------------------------------------------ |
+| `PORT`           | `5001`                | Порт API                                   |
+| `ADMIN_LOGIN`    | `admin`               | Логин админ-панели                         |
+| `ADMIN_PASSWORD` | `admin123`            | Пароль админ-панели                        |
+| `DB_PATH`        | `./database.sqlite`   | Путь к файлу SQLite относительно `server/` |
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 3. Запустить сервер и клиент
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Откройте два терминала в корне проекта.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+В первом запустите API:
 
-## Learn More
+```sh
+npm run server
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Во втором запустите React-приложение:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```sh
+npm start
+```
 
-### Code Splitting
+Откройте `http://localhost:3000`. Панель администратора доступна по адресу `http://localhost:3000/admin`. Для входа по умолчанию используйте `admin` / `admin123` (если значения не переопределены в `server/.env`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Если порт `5001` уже занят, остановите ранее запущенный сервер в его терминале (`Ctrl+C`), затем запустите `npm run server` снова.
 
-### Analyzing the Bundle Size
+Для разработки с автоматическим перезапуском API используйте `npm run dev:server` вместо `npm run server`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## API
 
-### Making a Progressive Web App
+Основные маршруты:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+| Метод             | Путь                                     | Назначение                                 |
+| ----------------- | ---------------------------------------- | ------------------------------------------ |
+| `GET`             | `/api/services`                          | Список услуг                               |
+| `GET`             | `/api/masters`                           | Список мастеров                            |
+| `GET`             | `/api/masters/:id/slots?date=YYYY-MM-DD` | Свободное время мастера                    |
+| `POST`            | `/api/appointments`                      | Создать запись                             |
+| `POST`            | `/api/auth/login`                        | Получить токен администратора              |
+| `GET`             | `/api/admin/appointments`                | Получить записи (Bearer-токен)             |
+| `PATCH`           | `/api/admin/appointments/:id`            | Изменить статус или заметку                |
+| `POST`            | `/api/admin/services`                    | Добавить услугу (Bearer-токен)             |
+| `PATCH`, `DELETE` | `/api/admin/services/:id`                | Изменить или удалить услугу (Bearer-токен) |
 
-### Advanced Configuration
+Защищённые маршруты требуют заголовок `Authorization: Bearer <token>`. Ошибки возвращаются в JSON с полем `error`. Полный перечень маршрутов и примеры запуска сервера находятся в [server/README.md](./server/README.md).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Данные и ограничения демо
 
-### Deployment
+- База создаётся автоматически в `server/database.sqlite`; локальная БД и `.env` исключены из Git.
+- Услуги и записи формы бронирования хранятся через API в SQLite. Услуги можно редактировать из админ-панели.
+- Расписание мастеров для демо сохраняется в `localStorage` браузера.
+- Старые заявки из прежней версии приложения, сохранённые только в `localStorage`, автоматически в SQLite не переносятся.
+- Токен администратора хранится в памяти сервера и сбрасывается при перезапуске.
+- Это учебный демо-сервер, не предназначенный для реальных персональных данных или production-эксплуатации. Для публикации нужно отдельно разместить API и настроить безопасную аутентификацию.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Полезные команды
 
-### `npm run build` fails to minify
+```sh
+npm start                 # запустить клиент
+npm run server            # запустить API
+npm run dev:server        # запуск API с перезапуском при изменениях
+npm run build             # production-сборка клиента
+npm test -- --watchAll=false
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+GitHub Pages публикует только статический клиент — локальный Express/SQLite API туда не входит. Для работы записи и админ-панели на опубликованном сайте API нужно разместить отдельно и настроить адрес запросов.
