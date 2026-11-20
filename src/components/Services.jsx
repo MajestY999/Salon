@@ -1,36 +1,50 @@
-import React, { useEffect, useState } from 'react';
-
-const SERVICES_KEY = 'simple_services';
+import React, { useEffect, useState } from "react";
+import { getServices } from "../utils/api";
 
 // витринные данные (desc, icon)
 const DEFAULT_SHOWCASE = [
-  { id: 1, name: 'Стрижка', desc: 'Классическая, мужская, женская, детская', icon: '✂️' },
-  { id: 2, name: 'Окрашивание', desc: 'Балаяж, мелирование, тонирование', icon: '🎨' },
-  { id: 3, name: 'Укладка', desc: 'Повседневная, вечерняя, свадебная', icon: '💇‍♀️' },
-  { id: 4, name: 'Визаж', desc: 'Дневной, вечерний, коррекция бровей', icon: '💄' },
+  {
+    id: 1,
+    name: "Стрижка",
+    desc: "Классическая, мужская, женская, детская",
+    icon: "✂️",
+  },
+  {
+    id: 2,
+    name: "Окрашивание",
+    desc: "Балаяж, мелирование, тонирование",
+    icon: "🎨",
+  },
+  {
+    id: 3,
+    name: "Укладка",
+    desc: "Повседневная, вечерняя, свадебная",
+    icon: "💇‍♀️",
+  },
+  {
+    id: 4,
+    name: "Визаж",
+    desc: "Дневной, вечерний, коррекция бровей",
+    icon: "💄",
+  },
 ];
 
-function readAdminServices() {
-  try {
-    const raw = localStorage.getItem(SERVICES_KEY);
-    const arr = raw ? JSON.parse(raw) : [];
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
-
 const Services = () => {
-  const [selected, setSelected] = useState(null);
   const [adminServices, setAdminServices] = useState([]);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    setAdminServices(readAdminServices());
-    const onStorage = (e) => {
-      if (e.key === SERVICES_KEY) setAdminServices(readAdminServices());
+    let active = true;
+    getServices()
+      .then((services) => {
+        if (active) setAdminServices(services);
+      })
+      .catch((error) => {
+        if (active) setLoadError(error.message);
+      });
+    return () => {
+      active = false;
     };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   // карта витринных desc/icon по id
@@ -43,46 +57,69 @@ const Services = () => {
   // - все услуги из админки (включая новые)
   // - для известных id берем desc/icon из витрины
   // - для новых id ставим дефолтные desc/icon
-  const merged = adminServices.map(s => {
+  const merged = adminServices.map((s) => {
     const def = showcaseById[s.id];
-    const name = s.name ?? def?.name ?? 'Услуга';
-    const priceNum = typeof s.price === 'number' ? s.price : Number(s.price);
+    const name = s.name ?? def?.name ?? "Услуга";
+    const priceNum = typeof s.price === "number" ? s.price : Number(s.price);
     return {
       id: s.id,
       name,
-      desc: def?.desc ?? 'Индивидуальная услуга',
-      icon: def?.icon ?? '✨',
-      priceText: Number.isFinite(priceNum) ? `от ${priceNum} ₽` : '—',
+      desc: def?.desc ?? "Индивидуальная услуга",
+      icon: def?.icon ?? "✨",
+      priceText: Number.isFinite(priceNum) ? `от ${priceNum} ₽` : "—",
     };
   });
 
   // если админка пуста, показываем витринные дефолтные (без цен)
   const listToRender = merged.length
     ? merged
-    : DEFAULT_SHOWCASE.map(def => ({
+    : DEFAULT_SHOWCASE.map((def) => ({
         id: def.id,
         name: def.name,
         desc: def.desc,
         icon: def.icon,
-        priceText: '—',
+        priceText: "—",
       }));
 
   return (
-    <section id="services" className="py-16 bg-light">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12 text-secondary">Наши услуги</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {listToRender.map(s => (
-            <div
+    <section id="services" className="bg-white py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 text-center sm:mb-12">
+          <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
+            Уход и красота
+          </p>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Наши услуги
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-slate-600">
+            Ознакомьтесь с услугами и ценами — запись доступна в форме ниже.
+          </p>
+          {loadError && (
+            <p role="alert" className="mt-3 text-sm text-red-600">
+              Не удалось загрузить услуги: {loadError}
+            </p>
+          )}
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {listToRender.map((s) => (
+            <article
               key={s.id}
-              onClick={() => setSelected(selected === s.id ? null : s.id)}
-              className={`p-6 rounded-xl shadow-md cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${selected === s.id ? 'ring-4 ring-primary bg-white scale-105' : 'bg-white'}`}
+              className="flex min-h-56 cursor-pointer flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md"
             >
-              <div className="text-4xl mb-3">{s.icon}</div>
-              <h3 className="font-bold text-lg">{s.name}</h3>
-              <p className="text-gray-600 text-sm mb-2">{s.desc}</p>
-              <p className="font-semibold text-primary">{s.priceText}</p>
-            </div>
+              <div
+                className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-2xl"
+                aria-hidden="true"
+              >
+                {s.icon}
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">{s.name}</h3>
+              <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
+                {s.desc}
+              </p>
+              <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                <p className="font-semibold text-blue-600">{s.priceText}</p>
+              </div>
+            </article>
           ))}
         </div>
         {/* Редактирование — только в админке. */}

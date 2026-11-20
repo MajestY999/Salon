@@ -1,32 +1,77 @@
+async function request(path, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    headers: {
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+      ...options.headers,
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  if (response.status === 204) return null;
 
-export const getMasters = () => Promise.resolve([
-  { id: 1, name: 'Анна' },
-  { id: 2, name: 'Ирина' },
-  { id: 3, name: 'Елена' },
-]);
-
-export const getServicesByMaster = (masterId) => {
-  const map = {
-    1: [{ id: 1, name: 'Стрижка', duration: 45 }, { id: 2, name: 'Окрашивание', duration: 120 }],
-    2: [{ id: 1, name: 'Стрижка', duration: 30 }, { id: 3, name: 'Укладка', duration: 20 }],
-    3: [{ id: 4, name: 'Визаж', duration: 60 }],
-  };
-  return Promise.resolve(map[masterId] || []);
-};
-
-export const getAvailableSlots = (masterId, serviceId, date = new Date()) => {
-  
-  const slots = [];
-  const start = 10;
-  const end = 19;
-  for (let h = start; h < end; h++) {
-    for (let m of [0, 30]) {
-      const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-      
-      if (!((h === 12 && m === 0) || (h === 15 && m === 30))) {
-        slots.push({ time: timeStr, available: true });
-      }
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    if (response.ok) {
+      throw new Error("Сервер вернул ответ в неподдерживаемом формате");
     }
+    data = {};
   }
-  return Promise.resolve(slots);
-};
+  if (!response.ok) {
+    throw new Error(data.error || `Ошибка запроса (${response.status})`);
+  }
+  return data;
+}
+
+function expectArray(data, resource) {
+  if (!Array.isArray(data)) {
+    throw new Error(`Сервер вернул некорректный список: ${resource}`);
+  }
+  return data;
+}
+
+export const getMasters = async () =>
+  expectArray(await request("/api/masters"), "мастера");
+export const getServices = async () =>
+  expectArray(await request("/api/services"), "услуги");
+export const getAvailableSlots = async (masterId, date) =>
+  expectArray(
+    await request(
+      `/api/masters/${masterId}/slots?date=${encodeURIComponent(date)}`,
+    ),
+    "время для записи",
+  );
+export const createAppointment = (appointment) =>
+  request("/api/appointments", { method: "POST", body: appointment });
+
+export const loginAdmin = (login, password) =>
+  request("/api/auth/login", {
+    method: "POST",
+    body: { login, password },
+  });
+export const getAdminAppointments = async (token) =>
+  expectArray(await request("/api/admin/appointments", { token }), "записи");
+export const updateAdminAppointment = (token, id, updates) =>
+  request(`/api/admin/appointments/${id}`, {
+    method: "PATCH",
+    token,
+    body: updates,
+  });
+export const deleteAdminAppointment = (token, id) =>
+  request(`/api/admin/appointments/${id}`, { method: "DELETE", token });
+export const deleteAllAdminAppointments = (token) =>
+  request("/api/admin/appointments", { method: "DELETE", token });
+
+export const createAdminService = (token, service) =>
+  request("/api/admin/services", { method: "POST", token, body: service });
+export const updateAdminService = (token, id, service) =>
+  request(`/api/admin/services/${id}`, {
+    method: "PATCH",
+    token,
+    body: service,
+  });
+export const deleteAdminService = (token, id) =>
+  request(`/api/admin/services/${id}`, { method: "DELETE", token });

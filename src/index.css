@@ -3,7 +3,20 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
   body {
-    @apply font-sans text-gray-800;
+    @apply m-0 bg-white font-sans text-slate-600 antialiased;
+    font-family: Inter, system-ui, sans-serif;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
 }

@@ -1,34 +1,57 @@
-import React from 'react';
+import React from "react";
 
 // плавный скролл к секции
 function scrollToId(id) {
   const el = document.querySelector(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 const Footer = () => {
   return (
-    <footer className="py-10 bg-gray-100 border-t">
-      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="border-t border-slate-800 bg-slate-950 py-12">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         {/* Бренд */}
         <div>
-          <p className="text-sm text-gray-600">© {new Date().getFullYear()} Ваш салон</p>
-          <p className="mt-2 text-sm text-gray-500">Красота и уход — каждый день.</p>
+          <a href="#home" className="text-lg font-bold text-white">
+            Стиль <span className="text-blue-400">&</span> Красота
+          </a>
+          <p className="mt-3 text-sm text-slate-400">
+            © {new Date().getFullYear()} Салон красоты
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Красота и уход — каждый день.
+          </p>
         </div>
 
         {/* Контакты */}
         <div>
-          <h4 className="font-semibold mb-2">Контакты</h4>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li><a href="tel:+79990000000" className="hover:underline">+7 (999) 000-00-00</a></li>
-            <li><a href="mailto:info@salon.ru" className="hover:underline">info@salon.ru</a></li>
+          <h4 className="mb-3 font-semibold text-white">Контакты</h4>
+          <ul className="space-y-2 text-sm text-slate-300">
+            <li>
+              <a
+                href="tel:+70000000000"
+                className="text-blue-400 hover:text-blue-500"
+              >
+                +7 (000) 000-00-00
+              </a>
+            </li>
+            <li>
+              <a
+                href="mailto:info@salon-style.ru"
+                className="hover:text-blue-400"
+              >
+                info@salon-style.ru
+              </a>
+            </li>
             <li>г. Владивосток, ул. Гоголя, д. 41</li>
             <li>
-              {/* якорь “как добраться” — ведёт к секции с id="#контакты" */}
               <a
-                href="#контакты"
-                onClick={(e) => { e.preventDefault(); scrollToId('#контакты'); }}
-                className="hover:underline"
+                href="#contacts"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToId("#contacts");
+                }}
+                className="hover:text-blue-400"
               >
                 Как добраться
               </a>
@@ -38,36 +61,61 @@ const Footer = () => {
 
         {/* Соцсети */}
         <div>
-          <h4 className="font-semibold mb-2">Мы в соцсетях</h4>
+          <h4 className="mb-3 font-semibold text-white">Мы в соцсетях</h4>
           <div className="flex gap-3 text-sm">
-            <a href="https://vk.com" target="_blank" rel="noreferrer" className="px-3 py-1 rounded bg-white shadow hover:bg-gray-50">VK</a>
-            <a href="https://t.me" target="_blank" rel="noreferrer" className="px-3 py-1 rounded bg-white shadow hover:bg-gray-50">Telegram</a>
+            <a
+              href="https://vk.com"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-slate-300 transition hover:border-blue-500 hover:text-blue-400"
+            >
+              VK
+            </a>
+            <a
+              href="https://t.me"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-slate-300 transition hover:border-blue-500 hover:text-blue-400"
+            >
+              Telegram
+            </a>
           </div>
         </div>
 
         {/* Быстрые ссылки */}
         <div>
-          <h4 className="font-semibold mb-2">Навигация</h4>
-          <ul className="text-sm text-gray-700 space-y-1">
-            {/* Эти работают как есть */}
-            <li><a href="#услуги" className="hover:underline">Услуги</a></li>
-            <li><a href="#booking" className="hover:underline">Онлайн запись</a></li>
-            {/* Команда — делаем принудительный скролл */}
+          <h4 className="mb-3 font-semibold text-white">Навигация</h4>
+          <ul className="space-y-2 text-sm text-slate-300">
+            <li>
+              <a href="#services" className="hover:text-blue-400">
+                Услуги
+              </a>
+            </li>
+            <li>
+              <a href="#booking" className="hover:text-blue-400">
+                Онлайн-запись
+              </a>
+            </li>
             <li>
               <a
                 href="#team"
-                onClick={(e) => { e.preventDefault(); scrollToId('#team'); }}
-                className="hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToId("#team");
+                }}
+                className="hover:text-blue-400"
               >
                 Команда
               </a>
             </li>
-            {/* Контакты — используем id "#контакты" (или поменяйте на '#contacts' если у вас так) */}
             <li>
               <a
-                href="#контакты"
-                onClick={(e) => { e.preventDefault(); scrollToId('#контакты'); }}
-                className="hover:underline"
+                href="#contacts"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToId("#contacts");
+                }}
+                className="hover:text-blue-400"
               >
                 Контакты
               </a>
@@ -77,9 +125,10 @@ const Footer = () => {
       </div>
 
       {/* Нижняя панель */}
-      <div className="container mx-auto px-4 mt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-        <p className="text-xs text-gray-500">Работаем: <br />Пн–Пт 10:00–21:00<br />  Сб-Вс 10:00–18:00</p>
-        
+      <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 px-4 pt-5 sm:px-6 lg:px-8">
+        <p className="text-xs leading-5 text-slate-400">
+          Работаем: Пн–Пт 10:00–21:00 · Сб–Вс 10:00–18:00
+        </p>
       </div>
     </footer>
   );

@@ -1,163 +1,234 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
+import {
+  createAppointment,
+  getAvailableSlots,
+  getMasters,
+  getServices,
+} from "../utils/api";
 
-const APPT_KEY = 'simple_appointments';
-const SERVICES_KEY = 'simple_services';
-const SCHEDULES_KEY = 'simple_schedules';
+const SCHEDULES_KEY = "simple_schedules";
 
-function readJSON(key, fallback = []) {
+function localDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function readSchedules() {
   try {
-    const raw = localStorage.getItem(key);
-    const v = raw ? JSON.parse(raw) : fallback;
-    return Array.isArray(v) ? v : fallback;
+    const raw = localStorage.getItem(SCHEDULES_KEY);
+    const schedules = raw ? JSON.parse(raw) : [];
+    return Array.isArray(schedules) ? schedules : [];
   } catch {
-    return fallback;
+    return [];
   }
 }
+
+const DEFAULT_WORK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function useBooking() {
   const [masters, setMasters] = useState([]);
   const [services, setServices] = useState([]);
   const [schedules, setSchedules] = useState({});
   const [formData, setFormData] = useState({
-    masterId: '',
-    serviceId: '',
-    slot: '',
-    name: '',
-    phone: '',
+    masterId: "",
+    serviceId: "",
+    slot: "",
+    date: localDateString(new Date()),
+    name: "",
+    phone: "",
   });
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState("idle");
+  const [slots, setSlots] = useState([]);
 
-  // мастера: берём из DEFAULT команды (Team.jsx) если нет API
   useEffect(() => {
-    // Попытка прочитать мастеров из localStorage, иначе из DOM/статического списка не делаем
-    // Здесь можно заменить на ваш getMasters() при наличии API
-    const teamDefaults = [
-      { id: 1, name: 'Анна' },
-      { id: 2, name: 'Ирина' },
-      { id: 3, name: 'Елена' },
-    ];
-    setMasters(teamDefaults);
-  }, []);
-
-  // услуги из админки
-  useEffect(() => {
-    setServices(readJSON(SERVICES_KEY, []));
-    const onStorage = (e) => {
-      if (e.key === SERVICES_KEY) setServices(readJSON(SERVICES_KEY, []));
+    let active = true;
+    Promise.all([getMasters(), getServices()])
+      .then(([masterList, serviceList]) => {
+        if (!active) return;
+        setMasters(masterList);
+        setServices(serviceList);
+      })
+      .catch((error) => {
+        if (active) {
+          setStatus("error");
+          setErrors({ global: error.message });
+        }
+      });
+    return () => {
+      active = false;
     };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // расписания из админки
   useEffect(() => {
-    const schArr = readJSON(SCHEDULES_KEY, []);
-    const schObj = {};
-    schArr.forEach(s => { if (s?.barberId != null) schObj[s.barberId] = s; });
-    setSchedules(schObj);
-
-    const onStorage = (e) => {
-      if (e.key === SCHEDULES_KEY) {
-        const arr = readJSON(SCHEDULES_KEY, []);
-        const obj = {};
-        arr.forEach(s => { if (s?.barberId != null) obj[s.barberId] = s; });
-        setSchedules(obj);
+    const loadSchedules = (masterList = masters) => {
+      const byMaster = {};
+      readSchedules().forEach((schedule) => {
+        if (schedule?.barberId != null) {
+          const legacyEmptySchedule =
+            Array.isArray(schedule.workDays) &&
+            schedule.workDays.length === 0 &&
+            (!schedule.startTime || schedule.startTime === "09:00");
+          byMaster[schedule.barberId] = {
+            ...schedule,
+            workDays:
+              !Array.isArray(schedule.workDays) || legacyEmptySchedule
+                ? DEFAULT_WORK_DAYS
+                : schedule.workDays,
+            startTime: schedule.startTime || "10:00",
+            endTime: schedule.endTime || "21:00",
+          };
+        }
+      });
+      masterList.forEach((master) => {
+        if (!byMaster[master.id]) {
+          byMaster[master.id] = {
+            barberId: master.id,
+            workDays: DEFAULT_WORK_DAYS,
+            startTime: "10:00",
+            endTime: "21:00",
+          };
+        }
+      });
+      setSchedules(byMaster);
+      if (masterList.length) {
+        localStorage.setItem(
+          SCHEDULES_KEY,
+          JSON.stringify(Object.values(byMaster)),
+        );
       }
     };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
-
-  // видимые услуги (можно фильтровать по мастеру, если нужно)
-  const visibleServices = useMemo(() => services, [services, formData.masterId]);
-
-  // слоты: генерируем по расписанию мастера
-  const [baseSlots, setBaseSlots] = useState([]);
-  useEffect(() => {
-    const mid = Number(formData.masterId);
-    const sid = Number(formData.serviceId);
-    if (!mid || !sid) { setBaseSlots([]); return; }
-
-    const sch = schedules[mid];
-    if (!sch?.startTime || !sch?.endTime) { setBaseSlots([]); return; }
-
-    const toMin = (t) => {
-      const m = String(t).match(/^(\d{2}):(\d{2})$/);
-      return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+    loadSchedules();
+    const onStorage = (event) => {
+      if (event.key === SCHEDULES_KEY) loadSchedules();
     };
-    const sMin = toMin(sch.startTime);
-    const eMin = toMin(sch.endTime);
-    if (sMin == null || eMin == null || sMin >= eMin) { setBaseSlots([]); return; }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [masters]);
 
-    // шаг 30 минут
-    const nextSlots = [];
-    for (let m = sMin; m <= eMin; m += 30) {
-      const hh = String(Math.floor(m / 60)).padStart(2, '0');
-      const mm = String(m % 60).padStart(2, '0');
-      nextSlots.push(`${hh}:${mm}`);
+  const masterId = formData.masterId;
+  const selectedDate = formData.date;
+  useEffect(() => {
+    if (!masterId || !selectedDate) {
+      setSlots([]);
+      return undefined;
     }
-    setBaseSlots(nextSlots);
-  }, [formData.masterId, formData.serviceId, schedules]);
 
-  
-  const slots = baseSlots;
+    let active = true;
+    const schedule = schedules[masterId];
+    const weekdayKey = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+      new Date(`${selectedDate}T12:00:00`).getDay()
+    ];
+    if (
+      schedule &&
+      (!schedule.workDays?.includes(weekdayKey) ||
+        !schedule.startTime ||
+        !schedule.endTime)
+    ) {
+      setSlots([]);
+      return undefined;
+    }
 
-  const handleChange = (e) => {
-    const { name, value } = e?.target || {};
+    getAvailableSlots(masterId, selectedDate)
+      .then((availableSlots) => {
+        if (!active) return;
+        const start = schedule?.startTime || "10:00";
+        const end = schedule?.endTime || "21:00";
+        setSlots(
+          availableSlots
+            .map(({ time }) => time)
+            .filter((time) => time >= start && time < end),
+        );
+      })
+      .catch((error) => {
+        if (active) {
+          setSlots([]);
+          setErrors((previous) => ({ ...previous, global: error.message }));
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [masterId, selectedDate, schedules]);
+
+  const visibleServices = useMemo(() => {
+    const master = masters.find(
+      (item) => item.id === Number(formData.masterId),
+    );
+    if (!master) return services;
+    if (Array.isArray(master.serviceIds)) {
+      return services.filter((service) =>
+        master.serviceIds.includes(service.id),
+      );
+    }
+    const specialty = master.specialty?.toLocaleLowerCase();
+    return specialty
+      ? services.filter((service) =>
+          specialty.includes(service.name.toLocaleLowerCase()),
+        )
+      : services;
+  }, [services, masters, formData.masterId]);
+
+  const handleChange = (event) => {
+    const { name, value } = event?.target || {};
     if (!name) return;
     setErrors({});
-    if (name === 'masterId') {
-      setFormData(prev => ({ ...prev, masterId: value, serviceId: '', slot: '' }));
-    } else if (name === 'serviceId') {
-      setFormData(prev => ({ ...prev, serviceId: value, slot: '' }));
+    if (name === "masterId") {
+      setFormData((previous) => ({
+        ...previous,
+        masterId: value,
+        serviceId: "",
+        slot: "",
+      }));
+    } else if (name === "serviceId" || name === "date") {
+      setFormData((previous) => ({ ...previous, [name]: value, slot: "" }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((previous) => ({ ...previous, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const { masterId, serviceId, slot, name, phone } = formData;
-    const errs = {};
-    if (!masterId) errs.masterId = 'Выберите мастера';
-    if (!serviceId) errs.serviceId = 'Выберите услугу';
-    if (!slot) errs.slot = 'Выберите время';
-    if (!name) errs.name = 'Введите имя';
-    if (!phone) errs.phone = 'Введите телефон';
-    if (Object.keys(errs).length) { setErrors({ ...errs, global: 'Заполните обязательные поля' }); return; }
-
-    setStatus('loading');
-    const svc = services.find(s => s.id === Number(serviceId));
-    const master = masters.find(m => m.id === Number(masterId));
-    const totalPrice = svc?.price ?? null;
-
-    const item = {
-      id: Date.now(),
-      name,
-      phone,
-      barberId: Number(masterId),
-      barberName: master?.name || '',
-      serviceId: Number(serviceId),
-      serviceName: svc?.name || '',
-      dateStr: new Date().toLocaleDateString(),
-      timeStr: slot,
-      totalPrice,
-      status: 'new',
-      note: '',
-    };
-
-    try {
-      const cur = readJSON(APPT_KEY, []);
-      const next = [...cur, item];
-      localStorage.setItem(APPT_KEY, JSON.stringify(next));
-      setStatus('success');
-      setFormData({ masterId: '', serviceId: '', slot: '', name: '', phone: '' });
-    } catch {
-      setStatus('error');
-      setErrors({ global: 'Ошибка сохранения' });
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const { masterId, serviceId, slot, date, name, phone } = formData;
+    const nextErrors = {};
+    if (!masterId) nextErrors.masterId = "Выберите мастера";
+    if (!serviceId) nextErrors.serviceId = "Выберите услугу";
+    if (!slot) nextErrors.slot = "Выберите время";
+    if (!date) nextErrors.date = "Выберите дату";
+    if (!name) nextErrors.name = "Введите имя";
+    if (!phone) nextErrors.phone = "Введите телефон";
+    if (Object.keys(nextErrors).length) {
+      setErrors({ ...nextErrors, global: "Заполните обязательные поля" });
+      return;
     }
-    setTimeout(() => setStatus('idle'), 2000);
+
+    setStatus("loading");
+    setErrors({});
+    try {
+      await createAppointment({
+        masterId: Number(masterId),
+        serviceId: Number(serviceId),
+        slot,
+        date,
+        name,
+        phone,
+      });
+      setStatus("success");
+      setFormData((previous) => ({
+        ...previous,
+        masterId: "",
+        serviceId: "",
+        slot: "",
+        name: "",
+        phone: "",
+      }));
+    } catch (error) {
+      setStatus("error");
+      setErrors({ global: error.message });
+    }
+    window.setTimeout(() => setStatus("idle"), 2500);
   };
 
   return {

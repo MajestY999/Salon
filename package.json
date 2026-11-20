@@ -17,11 +17,14 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "server": "npm --prefix server start",
+    "dev:server": "npm --prefix server run dev",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
+  "proxy": "http://localhost:5001",
   "eslintConfig": {
     "extends": [
       "react-app",

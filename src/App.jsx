@@ -33,11 +33,11 @@ const isAdminRoute = (() => {
   }
 
   return (
-    <div className="bg-violet-50">
+    <div className="min-h-screen bg-white text-slate-900">
+      <Header />
       <Hero />
       <Services />
       <Team />
-      <Header />
       <BookingForm />
       <Contacts />
       <Footer />

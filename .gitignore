@@ -5,6 +5,12 @@
 /.pnp
 .pnp.js
 .env
+server/.env
+server/*.db
+server/*.db-*
+server/*.sqlite
+server/*.sqlite-*
+server/node_modules/
 
 # testing
 /coverage
